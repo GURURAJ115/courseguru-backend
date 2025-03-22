@@ -1,8 +1,9 @@
 const {Router} = require("express");
-const {adminModel} = require("../db");
+const {adminModel, courseModel} = require("../db");
 const bcrypt = require("bcrypt");
 const adminRouter = Router();
 const jwt = require("jsonwebtoken");
+const { adminMiddleware } = require("../middlewares/admin");
 const JWT_ADMIN_PASSWORD=process.env.JWT_ADMIN;
 
 adminRouter.post("/signup",async (req,res)=>{
@@ -58,17 +59,36 @@ adminRouter.post("/signin",async(req,res)=>{
     }
 })
 
-adminRouter.post("/course",(req,res)=>{
-    res.json({
-        message: "endpoint"
-    })
+adminRouter.post("/course",adminMiddleware,async (req,res)=>{
+    const adminId = req.userId;
+
+    const {title, description, price, imageUrl} = req.body;
+
+    try{
+        const course=await courseModel.create({
+            title: title,
+            description: description,
+            price: price,
+            imageUrl: imageUrl,
+            creatorId: adminId
+        })
+        res.json({
+            message: "endpoint",
+            course: course._id
+        })
+    }
+    catch(e){
+        console.log(e);
+    }
 })
+
 adminRouter.put("/course",(req,res)=>{
     res.json({
         message: "endpoint"
     })
 })
 adminRouter.get("/course/bulk",(req,res)=>{
+    
     res.json({
         message: "endpoint"
     })
